@@ -15,7 +15,7 @@ for k, e in ipairs(api.get_valid_nodes()) do
 	end
 end
 
-m = Map(appname, "HAPROXY " .. translate("Load Balancing"))
+m = Map(appname, " " .. translate(""))
 api.set_apply_on_parse(m)
 
 m:append(Template(appname .. "/cbi/nodes_value_com"))
