@@ -9,7 +9,7 @@ server_address=$3
 server_port=$4
 
 pgrep -af "${CONFIG}/" | grep -E 'app\.sh.*(start|stop)|nftables\.sh|iptables\.sh|subscribe\.lua' >/dev/null && {
-	# 特定任务执行中不检测
+	# Not detected during specific task execution
 	exit 0
 }
 

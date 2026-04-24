@@ -35,19 +35,19 @@ while [ 1 -eq 1 ]; do
 		else
 			restart_count=0
 		fi
-		# 检查是否超过最大重启次数
+		# Check whether the maximum number of restarts has been exceeded
 		[ "$restart_count" -ge "$MAX_RESTART_COUNT" ] && continue
 
 		if ! pgrep -f "$cmd_check" >/dev/null; then
 			restart_count=$((restart_count + 1))
 			echo "$restart_count" > "$stats_file"
-			#echo "${cmd} 进程挂掉，重启" >> /tmp/log/passwall.log
+			#echo "${cmd} Process hangs，Restart" >> /tmp/log/passwall.log
 			sh -c "nohup $cmd 2>&1 &"
 			sleep 1
 		fi
 	done
 
-	# 每天清理一次统计文件（跨天后执行一次）
+	# Clean statistics files once a day（Executed once after a span of days）
 	current_date=$(date +%Y%m%d)
 	if [ "$current_date" != "$last_cleanup_date" ]; then
 		rm -f "${RESTART_STATS_DIR:?}"/* 2>/dev/null
