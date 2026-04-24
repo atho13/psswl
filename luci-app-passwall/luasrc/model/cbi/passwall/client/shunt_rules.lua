@@ -60,7 +60,6 @@ end
 protocol = s:option(MultiValue, "protocol", translate("Protocol"))
 protocol:value("http")
 protocol:value("tls")
-protocol:value("quic")
 protocol:value("bittorrent")
 protocol.widget = "checkbox"
 protocol.default = nil
