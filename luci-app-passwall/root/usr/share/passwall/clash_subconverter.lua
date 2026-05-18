@@ -16,7 +16,7 @@ local function host_format(host)
 	return host
 end
 
-local function build_alpn(alpn)   -- 排序+去重
+local function build_alpn(alpn)   -- sort+Remove duplicates
 	if not alpn then return nil end
 
 	local seen = {}
@@ -459,7 +459,7 @@ local function encode_node(node)
 	elseif t == "tuic" then return encode_tuic(node)
 	elseif t == "anytls" then return encode_anytls(node)
 	elseif t == "ssr" then return encode_ssr(node)
-	else api.log("订阅转换 → 丢弃不支持的节点：" .. node.name .. "，节点类型：" .. t)
+	else api.log("Subscription conversion → Drop unsupported nodes：" .. node.name .. "，Node type：" .. t)
 	end
 end
 
@@ -472,7 +472,7 @@ function parseClashNode(raw, remark)
 	if not data or type(data) ~= "table" then return raw end
 	if not data.proxies then return "" end
 
-	api.log('检测到 Clash 订阅，正在进行转换 ...')
+	api.log('detected Clash subscription，Conversion in progress ...')
 
 	local links = {}
 	for _, node in ipairs(data.proxies) do
