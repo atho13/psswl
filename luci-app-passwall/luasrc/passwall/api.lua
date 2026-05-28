@@ -132,12 +132,14 @@ function base64Encode(text)
 end
 
 function UrlEncode(szText)
+	if type(szText) ~= "string" then return "" end
 	return szText:gsub("([^%w%-_%.%~])", function(c)
 		return string.format("%%%02X", string.byte(c))
 	end)
 end
 
 function UrlDecode(szText)
+	if type(szText) ~= "string" then return "" end
 	return szText and szText:gsub("%+", " "):gsub("%%(%x%x)", function(h)
 		return string.char(tonumber(h, 16))
 	end) or nil
@@ -472,9 +474,10 @@ function get_valid_nodes()
 				end
 			end
 			local port = e.port or e.hysteria_hop or e.hysteria2_hop
-			if (port and e.address) or e.hysteria2_realms then
+			local is_realm = (e.type == "Hysteria2" or e.protocol == 'hysteria2') and e.hysteria2_realms or nil
+			if (port and e.address) or is_realm then
 				local address = e.address
-				if is_ip(address) or datatypes.hostname(address) or e.hysteria2_realms then
+				if is_ip(address) or datatypes.hostname(address) or is_realm then
 					if (e.type == "sing-box" or e.type == "Xray") and e.protocol then
 						local protocol = e.protocol
 						if protocol == "vmess" then
@@ -501,10 +504,11 @@ function get_valid_nodes()
 						type_name = type_name .. " " .. protocol
 					end
 					if is_ipv6(address) then address = get_ipv6_full(address) end
+					type_name = is_realm and type_name .. " Realm" or type_name
 					e["remark"] = trim("%s：[%s]" % {type_name, e.remarks})
 					if show_node_info == "1" then
 						port = (port or ""):gsub(":", "-")
-						if not e.hysteria2_realms then
+						if not is_realm then
 							e["remark"] = trim("%s：[%s] %s:%s" % {type_name, e.remarks, address, port})
 						end
 					end
@@ -595,6 +599,9 @@ function get_node_remarks(n)
 					protocol = protocol:gsub("^%l",string.upper)
 				end
 				type_name = type_name .. " " .. protocol
+			end
+			if (n.type == "Hysteria2" or n.protocol == 'hysteria2') and n.hysteria2_realms then
+				type_name = type_name .. " Realm"
 			end
 			remarks = trim("%s：[%s]" % {type_name, n.remarks})
 		end
@@ -1288,6 +1295,11 @@ function to_check_self()
 end
 
 function luci_types(id, m, s, type_name, option_prefix)
+	local fv_type
+	local field_type = s.fields["type"]
+	if field_type then
+		fv_type = field_type:formvalue(id)
+	end
 	local rewrite_option_table = {}
 	for key, value in pairs(s.fields) do
 		if key:find(option_prefix) == 1 then
@@ -1355,6 +1367,10 @@ function luci_types(id, m, s, type_name, option_prefix)
 				end
 			else
 				s.fields[key]:depends({ type = type_name })
+			end
+
+			if fv_type and fv_type ~= type_name then
+				s.fields[key].rmempty = true
 			end
 		end
 	end
@@ -1620,4 +1636,84 @@ function parse_realm_uri(uri)
 		end
 	end
 	return realm
+end
+
+function get_network_devices()
+	local _sysnet = "/sys/class/net/"
+	-- Map UCI interface names to their device names and vice versa
+	local _iface_to_dev = {}
+	local _dev_to_ifaces = {}
+	local _iface_proto = {}
+	uci:foreach("network", "interface", function(sec)
+		local name = sec[".name"]
+		if name ~= "loopback" then
+			_iface_proto[name] = sec.proto
+			if sec.device then
+				_iface_to_dev[name] = sec.device
+				_dev_to_ifaces[sec.device] = _dev_to_ifaces[sec.device] or {}
+				table.insert(_dev_to_ifaces[sec.device], name)
+			end
+		end
+	end)
+	-- Classify device type using sysfs attributes
+	local function classify_sysfs(dev)
+		if fs.stat(_sysnet .. dev .. "/bridge", "type") == "dir" then
+			return i18n.translate("Bridge")
+		elseif fs.stat(_sysnet .. dev .. "/wireless", "type") == "dir" then
+			return i18n.translate("Wireless Adapter")
+		elseif dev:match("^tun") or dev:match("^tap") or dev:match("^wg") or dev:match("^ppp") then
+			return i18n.translate("Tunnel Interface")
+		else
+			return i18n.translate("Ethernet Adapter")
+		end
+	end
+	-- Classify offline UCI interfaces by config hints
+	local function classify_uci(dev_name, proto)
+		if dev_name and dev_name:match("^br%-") then
+			return i18n.translate("Bridge")
+		elseif proto == "wireguard" or proto == "pppoe" or proto == "pptp" or proto == "l2tp" then
+			return i18n.translate("Tunnel Interface")
+		else
+			return i18n.translate("Interface")
+		end
+	end
+
+	local _seen = {}
+	local _devices = {}
+	-- Active kernel devices from /sys/class/net/
+	-- Skip bridge member ports (/master) and DSA master devices (/dsa)
+	local _iter = fs.dir(_sysnet)
+	if _iter then
+		for dev in _iter do
+			if dev ~= "lo"
+				and not dev:match("^veth")
+				and not dev:match("^ifb")
+				and not dev:match("^gre")
+				and not dev:match("^sit")
+				and not dev:match("^ip6tnl")
+				and not dev:match("^erspan")
+				and not fs.stat(_sysnet .. dev .. "/master", "type")
+				and not fs.stat(_sysnet .. dev .. "/dsa", "type")
+			then
+				local dtype = classify_sysfs(dev)
+				local label = dtype .. ': "' .. dev .. '"'
+				if _dev_to_ifaces[dev] then
+					label = label .. " (" .. table.concat(_dev_to_ifaces[dev], ", ") .. ")"
+				end
+				_devices[#_devices + 1] = { name = dev, label = label, sort = dtype .. ":" .. dev }
+				_seen[dev] = true
+			end
+		end
+	end
+	-- UCI interfaces whose device does not currently exist
+	for iface, dev in pairs(_iface_to_dev) do
+		if not _seen[dev] then
+			local dtype = classify_uci(dev, _iface_proto[iface])
+			local label = dtype .. ': "' .. iface .. '"'
+			_devices[#_devices + 1] = { name = iface, label = label, sort = "zzz:" .. iface }
+			_seen[dev] = true
+		end
+	end
+	table.sort(_devices, function(a, b) return a.sort < b.sort end)
+	return _devices
 end

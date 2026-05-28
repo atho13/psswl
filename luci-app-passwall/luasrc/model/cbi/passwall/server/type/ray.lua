@@ -1,14 +1,21 @@
 local m, s = ...
 
-local api = require "luci.passwall.api"
-
 if not api.finded_com("xray") then
 	return
 end
 
-local fs = api.fs
-
 local type_name = "Xray"
+
+-- [[ Xray ]]
+
+s.fields["type"]:value(type_name, "Xray")
+if not s.fields["type"].default then
+	s.fields["type"].default = type_name
+end
+
+if s.val["type"] and s.val["type"] ~= type_name then
+	return
+end
 
 local option_prefix = "xray_"
 
@@ -23,10 +30,6 @@ local x_ss_method_list = {
 local header_type_list = {
 	"none", "srtp", "utp", "wechat-video", "dtls", "wireguard", "dns"
 }
-
--- [[ Xray ]]
-
-s.fields["type"]:value(type_name, "Xray")
 
 o = s:option(Flag, _n("custom"), translate("Use Custom Config"))
 
@@ -483,8 +486,11 @@ o:depends({ [_n("outbound_node")] = "_socks"})
 o:depends({ [_n("outbound_node")] = "_http"})
 
 o = s:option(Value, _n("outbound_node_iface"), translate("Interface"))
-o.default = "eth1"
 o:depends({ [_n("outbound_node")] = "_iface"})
+local netdev_list = api.get_network_devices()
+for _, d in ipairs(netdev_list) do
+	o:value(d.name, d.label)
+end
 
 o = s:option(TextValue, _n("custom_config"), translate("Custom Config"))
 o.rows = 10

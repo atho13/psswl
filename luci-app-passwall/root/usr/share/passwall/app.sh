@@ -374,7 +374,7 @@ run_socks() {
 		fi
 	fi
 
-	if [ -n "${error_msg}" ] && [ "$(config_n_get $node hysteria2_realms)" = "1" ]; then
+	if [ -n "${error_msg}" ] && ([ -n "$(config_n_get $node hysteria_hop)" ] || [ -n "$(config_n_get $node hysteria2_hop)" ] || [ "$(config_n_get $node hysteria2_realms)" = "1" ]); then
 		unset error_msg
 	fi
 
@@ -2038,6 +2038,7 @@ get_config() {
 		SMARTDNS_LISTEN_PORT=${NEXT_DNS_LISTEN_PORT}
 		NEXT_DNS_LISTEN_PORT=$(expr $NEXT_DNS_LISTEN_PORT + 1)
 		LOCAL_DNS="127.0.0.1#${SMARTDNS_LOCAL_PORT}"
+		set_cache_var "SMARTDNS_LOCAL_PORT" "${SMARTDNS_LOCAL_PORT}"
 	}
 }
 
