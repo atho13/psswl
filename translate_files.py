@@ -1,34 +1,54 @@
 import os
 import re
 import time
+import random
 from deep_translator import GoogleTranslator
 from multiprocessing import Pool, cpu_count
 
+# Target folder
 target_folder = "luci-app-passwall/root/usr/share/passwall"
 
+# TETAP: Menggunakan target 'en' (Inggris)
 translator = GoogleTranslator(source='zh-CN', target='en')
 
 chinese_pattern = re.compile(r'[\u4e00-\u9fff]+')
 
 def translate_file(file_path):
     print(f"Translating file: {file_path}")
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except Exception as e:
+        print(f"Failed to read file {file_path}: {e}")
+        return
     
     def translate_match(match):
-        try:
-            return translator.translate(match.group(0))
-        except Exception as e:
-            print(f"Error translating text: {match.group(0)}. Skipping...")
-            return match.group(0)
+        text_to_translate = match.group(0)
+        # Mencoba hingga 3 kali jika terjadi error/blokir dari Google
+        for attempt in range(3):
+            try:
+                # Jeda acak agar tidak dianggap spam oleh Google
+                time.sleep(random.uniform(0.5, 1.5))
+                return translator.translate(text_to_translate)
+            except Exception as e:
+                if attempt == 2:  # Jika sudah 3 kali tetap gagal
+                    print(f"Error translating text: {text_to_translate}. Skipping...")
+                    return text_to_translate
+                # Jeda lebih lama sebelum mencoba lagi
+                time.sleep(2)
 
     translated_content = chinese_pattern.sub(translate_match, content)
 
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(translated_content)
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(translated_content)
+    except Exception as e:
+        print(f"Failed to write file {file_path}: {e}")
 
 def process_files(files):
-    with Pool(cpu_count()) as pool:
+    # Mengurangi jumlah proses bersamaan agar lebih aman dari pembatasan Google
+    max_workers = min(2, cpu_count())
+    with Pool(max_workers) as pool:
         pool.map(translate_file, files)
 
 if __name__ == "__main__":
