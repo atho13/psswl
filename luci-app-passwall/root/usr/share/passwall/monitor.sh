@@ -47,7 +47,7 @@ while [ 1 -eq 1 ]; do
 		fi
 	done
 
-	# Clean statistics files once a day（跨天后执行一次）
+	# Clean statistics files once a day（Executed once after a span of days）
 	current_date=$(date +%Y%m%d)
 	if [ "$current_date" != "$last_cleanup_date" ]; then
 		rm -f "${RESTART_STATS_DIR:?}"/* 2>/dev/null

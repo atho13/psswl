@@ -724,7 +724,7 @@ if geo2rule == "1" then
 		remove_tmp_geofile("geosite")
 	end
 
-	-- 如果是手动更新(arg2exist)Always generate rules
+	-- If updating manually(arg2exist)Always generate rules
 	if arg2 then geoip_update_ok, geosite_update_ok = true, true end
 	chnroute_update, chnroute6_update, gfwlist_update, chnlist_update = "1", "1", "1", "1"
 

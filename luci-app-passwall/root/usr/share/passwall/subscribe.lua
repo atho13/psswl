@@ -823,7 +823,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 						local obfs = result.plugin_opts:match("obfs=([^;]+)") or ""
 						local obfs_host = result.plugin_opts:match("obfs%-host=([^;]+)") or ""
 						if obfs == "" or obfs_host == "" then
-							result.error_msg = "SS " .. result.plugin .. " 插件选项不完整。"
+							result.error_msg = "SS " .. result.plugin .. " Incomplete plugin options。"
 						end
 						if obfs == "http" then
 							result.transport = "raw"
@@ -958,7 +958,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 					result.tls_allowInsecure = (insecure == "1" or insecure == "0") and insecure or (sub_allowinsecure and "1" or "0")
 					result.uot = params.udp
 				else
-					result.error_msg = "Please replace Xray or Sing-Box 来支持 SS More transmission methods。"
+					result.error_msg = "Please replace Xray or Sing-Box to support SS More transmission methods。"
 				end
 			end
 
@@ -2094,7 +2094,7 @@ local function parse_link(raw, add_mode, group, sub_cfg)
 							end
 						end
 					else
-						log('跳过未知类型：' .. szType)
+						log('Skip unknown types：' .. szType)
 					end
 					-- log(result)
 					if result then

@@ -393,7 +393,7 @@ function add_rule(var)
 						process_address(url)
 					end
 				end)
-				log(string.format("  - 节点列表中的域名(vpslist)：%s", fwd_dns or "default"))
+				log(string.format("  - Domain name in node list(vpslist)：%s", fwd_dns or "default"))
 			end
 		end
 
@@ -446,7 +446,7 @@ function add_rule(var)
 					if REMOTE_FAKEDNS == "1" then
 						sets = {}
 					end
-					--始终使用远程DNSparsing agent（blacklist）list
+					--Always use remoteDNSparsing agent（blacklist）list
 					for line in io.lines("/usr/share/passwall/rules/proxy_host") do
 						line = api.get_std_domain(line)
 						if line ~= "" and not line:find("#") and not line:find(":") then

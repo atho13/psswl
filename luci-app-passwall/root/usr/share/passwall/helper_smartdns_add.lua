@@ -312,7 +312,7 @@ if USE_BLOCK_LIST == "1" and not fs.access(file_block_host) then
 	end
 	if USE_GEOVIEW == "1" and geosite_arg ~= "" and api.is_finded("geoview") then
 		if get_geosite(geosite_arg, file_block_host) == 0 then
-			log("  * parse[Block list] Geosite 到屏蔽域名表(blocklist)Finish")
+			log("  * parse[Block list] Geosite To the blocked domain name table(blocklist)Finish")
 		else
 			log("  * parse[Block list] Geosite To the blocked domain name table(blocklist)fail！")
 		end
@@ -366,7 +366,7 @@ if is_file_nonzero(file_vpslist) then
 	domain_rules_str = domain_rules_str .. (LOCAL_EXTEND_ARG ~= "" and " " .. LOCAL_EXTEND_ARG or "")
 	table.insert(tmp_lines, domain_rules_str)
 	insert_array_after(config_lines, tmp_lines, "#--8")
-	log(string.format("  - 节点列表中的域名(vpslist)Use grouping：%s", LOCAL_GROUP or "default"))
+	log(string.format("  - Domain name in node list(vpslist)Use grouping：%s", LOCAL_GROUP or "default"))
 end
 
 --direct connection（whitelist）list

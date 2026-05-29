@@ -530,7 +530,7 @@ get_local_ips() {
 		ALL_IPS=$(ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1)
 		WAN_IPS=$(get_wan_ips ip4)
 	fi
-	# Supplementary loopback（scope global 不包含）
+	# Supplementary loopback（scope global Not included）
 	[ "$family" = "ip6" ] && ALL_IPS="$ALL_IPS ::1"
 	[ "$family" != "ip6" ] && ALL_IPS="$ALL_IPS 127.0.0.1"
 	for ip in $ALL_IPS; do
