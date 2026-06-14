@@ -51,11 +51,7 @@ function index()
 	entry({"admin", "services", appname, "socks_config"}, cbi(appname .. "/client/socks_config")).leaf = true
 	entry({"admin", "services", appname, "acl"}, cbi(appname .. "/client/acl"), _("Access control"), 98).leaf = true
 	entry({"admin", "services", appname, "acl_config"}, cbi(appname .. "/client/acl_config")).leaf = true
-	entry({"admin", "services", appname, "log"}, form(appname .. "/client/log"), _("Runtime Logs"), 999).leaf = true
-
-	--[[ Server ]]
-	entry({"admin", "services", appname, "server"}, cbi(appname .. "/server/index"), _("Server-Side"), 99).leaf = true
-	entry({"admin", "services", appname, "server_user"}, cbi(appname .. "/server/user")).leaf = true
+	entry({"admin", "services", appname, "log"}, form(appname .. "/client/log"), _("Logs"), 999).leaf = true
 
 	--[[ API ]]
 	entry({"admin", "services", appname, "server_user_update"}, call("server_user_update")).leaf = true
