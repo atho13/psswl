@@ -52,10 +52,14 @@ function index()
 	entry({"admin", "services", appname, "socks_config"}, cbi(appname .. "/client/socks_config")).leaf = true
 	entry({"admin", "services", appname, "acl"}, cbi(appname .. "/client/acl"), _("Access control"), 98).leaf = true
 	entry({"admin", "services", appname, "acl_config"}, cbi(appname .. "/client/acl_config")).leaf = true
+<<<<<<< HEAD
 	entry({"admin", "services", appname, "log"}, form(appname .. "/client/log"), _("Watch Logs"), 999).leaf = true
 
 	--[[ Server ]]
 	entry({"admin", "services", appname, "server_user"}, cbi(appname .. "/server/user")).leaf = true
+=======
+	entry({"admin", "services", appname, "log"}, form(appname .. "/client/log"), _("Logs"), 999).leaf = true
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 
 	--[[ API ]]
 	entry({"admin", "services", appname, "server_user_status"}, call("server_user_status")).leaf = true
@@ -1031,3 +1035,20 @@ function flush_set()
 		http.redirect(api.url("log"))
 	end
 end
+<<<<<<< HEAD
+=======
+
+function fetch_certsha256()
+	local id = http.formvalue("id") or ""
+	local address = (id ~= "") and uci:get(appname, id, "address") or ""
+	local port = (id ~= "") and uci:get(appname, id, "port") or 0
+	local sni = (id ~= "") and uci:get(appname, id, "tls_serverName") or ""
+	sni = (sni ~= "") and sni or address
+	if address == "" or port == 0 then
+		http_write_json_error()
+		return
+	end
+	local data = api.fetch_cert_sha256(address, port, sni, 5)
+	http_write_json(data ~= "" and { code = 1, data = data } or { code = 0 })
+end
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75

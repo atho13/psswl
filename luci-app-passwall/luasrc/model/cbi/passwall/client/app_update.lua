@@ -5,7 +5,7 @@ m = Map(appname)
 api.set_apply_on_parse(m)
 
 -- [[ App Settings ]]--
-s = m:section(TypedSection, "global_app", translate("App Update"),
+s = m:section(TypedSection, "global_app", translate(""),
 				"<font color='red'>" ..
 				translate("Please confirm that your firmware supports FPU.") ..
 				"</font>")

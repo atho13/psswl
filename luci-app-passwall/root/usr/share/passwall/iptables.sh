@@ -344,7 +344,11 @@ load_acl() {
 					else
 						#Will end upreturn，No need to add extra rules。
 						unset tcp_port
+<<<<<<< HEAD
 						echolog "     - ${msg}Not an agent for all TCP port"
+=======
+						echolog "     - ${msg}Not representing all TCP port"
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 					fi
 				}
 				
@@ -356,7 +360,11 @@ load_acl() {
 					else
 						#Will end upreturn，No need to add extra rules。
 						unset udp_port
+<<<<<<< HEAD
 						echolog "     - ${msg}Not an agent for all UDP port"
+=======
+						echolog "     - ${msg}Not representing all UDP port"
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 					fi
 				}
 				
@@ -552,7 +560,11 @@ load_acl() {
 				echolog "     - ${msg}Not an agent TCP port[${TCP_NO_REDIR_PORTS}]"
 			else
 				unset TCP_PROXY_MODE
+<<<<<<< HEAD
 				echolog "     - ${msg}Not an agent for all TCP port"
+=======
+				echolog "     - ${msg}Not representing all TCP port"
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 		
@@ -563,7 +575,11 @@ load_acl() {
 				echolog "     - ${msg}Not an agent UDP port[${UDP_NO_REDIR_PORTS}]"
 			else
 				unset UDP_PROXY_MODE
+<<<<<<< HEAD
 				echolog "     - ${msg}Not an agent for all UDP port"
+=======
+				echolog "     - ${msg}Not representing all UDP port"
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 		
@@ -734,7 +750,7 @@ filter_haproxy() {
 }
 
 filter_vpsip() {
-	local EXCLUDE_VPSIP="^(127\.0\.0\.1|1\.1\.1\.1|1\.1\.1\.2|8\.8\.8\.8|8\.8\.4\.4|9\.9\.9\.9)$"
+	local EXCLUDE_VPSIP="^(0\.0\.0\.0|127\.0\.0\.1|1\.1\.1\.1|1\.1\.1\.2|8\.8\.8\.8|8\.8\.4\.4|9\.9\.9\.9)$"
 	uci show $CONFIG | grep -E "(\.address=|\.download_address=)" | cut -d "'" -f 2 | grep -E "^([0-9]{1,3}\.){3}[0-9]{1,3}$" | grep -Ev "$EXCLUDE_VPSIP" | sed "s/^/add $IPSET_VPS /" | awk '1; END{print "COMMIT"}' | ipset -! -R
 	echolog "  - [$?]Join allIPv4node toipset[$IPSET_VPS]Direct connection completed"
 	uci show $CONFIG | grep -E "(\.address=|\.download_address=)" | cut -d "'" -f 2 | grep -E "([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4}" | sed "s/^/add $IPSET_VPS6 /" | awk '1; END{print "COMMIT"}' | ipset -! -R
@@ -1151,7 +1167,11 @@ add_firewall_rule() {
 				echolog "  - ${msg}Not an agent TCP port[${TCP_NO_REDIR_PORTS}]"
 			else
 				unset LOCALHOST_TCP_PROXY_MODE
+<<<<<<< HEAD
 				echolog "  - ${msg}Not an agent for all TCP port"
+=======
+				echolog "  - ${msg}Not representing all TCP port"
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 		
@@ -1162,7 +1182,11 @@ add_firewall_rule() {
 				echolog "  - ${msg}Not an agent UDP port[${UDP_NO_REDIR_PORTS}]"
 			else
 				unset LOCALHOST_UDP_PROXY_MODE
+<<<<<<< HEAD
 				echolog "  - ${msg}Not an agent for all UDP port"
+=======
+				echolog "  - ${msg}Not representing all UDP port"
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 

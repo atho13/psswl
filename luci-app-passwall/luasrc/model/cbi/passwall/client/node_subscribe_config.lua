@@ -133,9 +133,42 @@ o.validate = function(self, value)
 	return value:gsub("%s+", ""):gsub("%z", "")
 end
 
+<<<<<<< HEAD
 o = s:option(Flag, "allowInsecure", translate("allowInsecure"), translate("Whether unsafe connections are allowed. When checked, Certificate validation will be skipped."))
 o.default = "0"
 o.rmempty = false
+=======
+o = s:option(ListValue, "domain_resolver", translate("Domain DNS Resolve"))
+o.description = translate("If the node address is a domain name, this DNS will be used for resolution.") .. "<br>" ..
+		translate("Supports only Xray or Sing-box node types.") .. "<br>" .. string.format('<font color="red">%s</font>',
+		translate("Note: For node-specific DNS only. Keep Auto to avoid extra overhead."))
+o:value("", translate("Auto"))
+o:value("tcp", "TCP")
+o:value("udp", "UDP")
+o:value("https", "DoH")
+
+o = s:option(Value, "domain_resolver_dns", "DNS")
+o.datatype = "or(ipaddr,ipaddrport)"
+o:value("114.114.114.114")
+o:value("223.5.5.5:53")
+o.default = o.keylist[1]
+o:depends({ domain_resolver = "tcp" })
+o:depends({ domain_resolver = "udp" })
+
+o = s:option(Value, "domain_resolver_dns_https", "DNS")
+o:value("https://120.53.53.53/dns-query", "DNSPod")
+o:value("https://223.5.5.5/dns-query", "AliDNS")
+o.default = o.keylist[1]
+o:depends({ domain_resolver = "https" })
+
+o = s:option(ListValue, "domain_strategy", translate("Domain Strategy"), translate("If is domain name, The requested domain name will be resolved to IP before connect."))
+o.default = ""
+o:value("", translate("Auto"))
+o:value("UseIPv4v6", translate("Prefer IPv4"))
+o:value("UseIPv6v4", translate("Prefer IPv6"))
+o:value("UseIPv4", translate("IPv4 Only"))
+o:value("UseIPv6", translate("IPv6 Only"))
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 
 o = s:option(ListValue, "filter_keyword_mode", translate("Filter keyword Mode"))
 o.default = "5"

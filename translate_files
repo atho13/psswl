@@ -1,6 +1,7 @@
 import os
 import re
 import time
+<<<<<<< HEAD
 import random
 from deep_translator import GoogleTranslator
 from multiprocessing import Pool, cpu_count
@@ -9,12 +10,20 @@ from multiprocessing import Pool, cpu_count
 target_folder = "luci-app-passwall/root/usr/share/passwall"
 
 # TETAP: Menggunakan target 'en' (Inggris)
+=======
+from deep_translator import GoogleTranslator
+from multiprocessing import Pool, cpu_count
+
+target_folder = "luci-app-passwall/root/usr/share/passwall"
+
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 translator = GoogleTranslator(source='zh-CN', target='en')
 
 chinese_pattern = re.compile(r'[\u4e00-\u9fff]+')
 
 def translate_file(file_path):
     print(f"Translating file: {file_path}")
+<<<<<<< HEAD
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -49,6 +58,25 @@ def process_files(files):
     # Mengurangi jumlah proses bersamaan agar lebih aman dari pembatasan Google
     max_workers = min(2, cpu_count())
     with Pool(max_workers) as pool:
+=======
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    def translate_match(match):
+        try:
+            return translator.translate(match.group(0))
+        except Exception as e:
+            print(f"Error translating text: {match.group(0)}. Skipping...")
+            return match.group(0)
+
+    translated_content = chinese_pattern.sub(translate_match, content)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(translated_content)
+
+def process_files(files):
+    with Pool(cpu_count()) as pool:
+>>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
         pool.map(translate_file, files)
 
 if __name__ == "__main__":
