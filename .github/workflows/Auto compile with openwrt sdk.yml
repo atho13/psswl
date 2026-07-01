@@ -115,8 +115,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container_tag: x86_64-21.02.7
-            ver: "22.03-"
+          #- container_tag: x86_64-21.02.7
+            #ver: "22.03-"
 
           - container_tag: x86_64-24.10.5
             ver: "23.05-24.10"
