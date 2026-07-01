@@ -448,11 +448,7 @@ do
 	end
 end
 
-<<<<<<< HEAD
--- Get airport information（remaining traffic、Expiration time）
-=======
 -- Get airport information（remaining flow、Expiration time）
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 local subscribe_info = {}
 local function get_subscribe_info(cfgid, value)
 	if type(cfgid) ~= "string" or cfgid == "" or type(value) ~= "string" then
@@ -466,11 +462,7 @@ local function get_subscribe_info(cfgid, value)
 	local date_patterns = {"Package expires：(.+)", "Expiration time：(.+)", "Valid until：(.+)", "Expiration time：(.+)", "expiration date：(.+)"}
 	local expired_date
 	for _, p in ipairs(date_patterns) do expired_date = value:match(p) or expired_date end
-<<<<<<< HEAD
-	local rem_patterns = {"remaining traffic：(.+)", "Traffic remaining：(.+)", "Available traffic：(.+)", "Package remaining：(.+)"}
-=======
 	local rem_patterns = {"remaining flow：(.+)", "Traffic remaining：(.+)", "Available traffic：(.+)", "Package remaining：(.+)"}
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 	local rem_traffic
 	for _, p in ipairs(rem_patterns) do rem_traffic = value:match(p) or rem_traffic end
 	subscribe_info[cfgid] = subscribe_info[cfgid] or {expired_date = "", rem_traffic = ""}
@@ -548,11 +540,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 	--ssr://base64(host:port:protocol:method:obfs:base64pass/?obfsparam=base64param&protoparam=base64param&remarks=base64remarks&group=base64group&udpport=0&uot=0)
 	if szType == 'ssr' then
 		if not has_ssr then
-<<<<<<< HEAD
-			log("jump over SSR node，Because it is not installed SSR core program shadowsocksr-libev。")
-=======
 			log("jump over SSR node，Not installed SSR core program shadowsocksr-libev。")
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			return nil
 		end
 		result.type = "SSR"
@@ -609,7 +597,16 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 		elseif result.type == "Xray" and info.net == "tcp" then
 			info.net = "raw"
 		end
-		if info.net == 'h2' or info.net == 'http' then
+		-- Clash 'network: http' = TCP + HTTP/1.1 header obfuscation (no TLS),
+		-- i.e. Xray raw transport with tcp header type "http" -- NOT xhttp
+		-- (splithttp). Normalize to 'raw' + guise 'http' so the tcp_guise
+		-- block below handles it; the server otherwise replies HTTP 400.
+		-- 'h2' still maps to xhttp (Xray dropped the standalone h2 transport).
+		if info.net == 'http' and result.type == "Xray" then
+			info.net = "raw"
+			info.type = "http"
+			result.transport = "raw"
+		elseif info.net == 'h2' or info.net == 'http' then
 			info.net = "http"
 			result.transport = (result.type == "Xray") and "xhttp" or "http"
 		else
@@ -1058,11 +1055,24 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 			end
 			result.port = port
 
-			result.tls = '1'
-			result.tls_serverName = params.peer or params.sni or ""
-			result.tls_pinSHA256 = params.pcs
-			result.tls_CertByName = params.vcn
-			result.tls_allowInsecure = params.allowinsecure or params.allowInsecure or params.insecure
+			params.security = params.security or "tls"
+			if params.security == "tls" or params.security == "reality" then
+				result.tls = '1'
+				result.tls_serverName = params.peer or params.sni or ""
+				result.alpn = params.alpn
+				if params.fp and params.fp ~= "" then
+					result.utls = "1"
+					result.fingerprint = params.fp
+				end
+				if params.security == "reality" then
+					result.reality = "1"
+					result.reality_publicKey = params.pbk or nil
+					result.reality_shortId = params.sid or nil
+				end
+				result.tls_pinSHA256 = params.pcs
+				result.tls_CertByName = params.vcn
+				result.tls_allowInsecure = params.allowinsecure or params.allowInsecure or params.insecure
+			end
 
 			if not params.type then params.type = "tcp" end
 			params.type = string.lower(params.type)
@@ -1136,7 +1146,6 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 				result.httpupgrade_path = params.path
 			end
 
-			result.alpn = params.alpn
 			result.tcp_fast_open = params.tfo
 			result.use_finalmask = (params.fm and params.fm ~= "") and "1" or nil
 			result.finalmask = (params.fm and params.fm ~= "") and api.base64Encode(params.fm) or nil
@@ -1331,11 +1340,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 			result.type = 'sing-box'
 			result.protocol = "hysteria"
 		else
-<<<<<<< HEAD
-			log("jump over Hysteria node，Because it is not installed Hysteria core program Sing-box。")
-=======
 			log("jump over Hysteria node，Not installed Hysteria core program Sing-box。")
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			return nil
 		end
 
@@ -1426,6 +1431,10 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 			result.hysteria2_obfs_type = params.obfs or "salamander"
 			result.hysteria2_obfs_password = params["obfs-password"] or params["obfs_password"]
 		end
+		if params.obfs == "gecko" then
+			result.hysteria2_obfs_MinPacketSize = params.minpacketsize or "512"
+			result.hysteria2_obfs_MaxPacketSize = params.maxpacketsize or "1200"
+		end
 
 		if (sub_hysteria2_type == "sing-box" and has_singbox) or (sub_hysteria2_type == "xray" and has_xray) then
 			local is_singbox = sub_hysteria2_type == "sing-box" and has_singbox
@@ -1444,11 +1453,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 			result.type = 'sing-box'
 			result.protocol = "tuic"
 		else
-<<<<<<< HEAD
-			log("jump over Tuic node，Because it is not installed Tuic core program Sing-box。")
-=======
 			log("jump over Tuic node，Not installed Tuic core program Sing-box。")
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			return nil
 		end
 
@@ -1505,11 +1510,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 			result.type = 'sing-box'
 			result.protocol = "anytls"
 		else
-<<<<<<< HEAD
-			log("jump over AnyTLS node，Because it is not installed AnyTLS core program Sing-box 1.12。")
-=======
 			log("jump over AnyTLS node，Not installed AnyTLS core program Sing-box 1.12。")
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			return nil
 		end
 
@@ -1577,11 +1578,7 @@ local function processData(szType, content, add_mode, group, sub_cfg)
 			result.type = 'sing-box'
 			result.protocol = "naive"
 		else
-<<<<<<< HEAD
-			log("jump over NaïveProxy node，Because it is not installed NaïveProxy core program Sing-box。")
-=======
 			log("jump over NaïveProxy node，Not installed NaïveProxy core program Sing-box。")
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			return nil
 		end
 
@@ -2087,14 +2084,10 @@ local function parse_link(raw, add_mode, group, sub_cfg)
 				sub_cfg = sub_cfg
 			}
 		end
-<<<<<<< HEAD
-		log('Successfully parsed【' .. group .. '】Number of nodes：' .. #node_list)
-=======
 		log('Parsed successfully【' .. group .. '】Number of nodes：' .. #node_list)
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 	else
 		if add_mode == "2" then
-			log('obtained【' .. group .. '】Subscription content is empty，It may be that the subscription address is invalid，Or network problem，Please diagnose！')
+			log('obtained【' .. group .. '】Subscription content is empty，It may be that the subscription address is invalid，or network problem，Please diagnose！')
 		end
 	end
 end
@@ -2169,7 +2162,7 @@ local execute = function()
 
 		if #fail_list > 0 then
 			for index, value in ipairs(fail_list) do
-				log(string.format('【%s】Subscription failed，It may be that the subscription address is invalid，Or network problem，Please diagnose！[%s]', value.remark, tostring(value.http_code)))
+				log(string.format('【%s】Subscription failed，It may be that the subscription address is invalid，or network problem，Please diagnose！[%s]', value.remark, tostring(value.http_code)))
 			end
 		end
 		update_node(0)

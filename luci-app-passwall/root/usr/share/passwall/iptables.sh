@@ -153,7 +153,7 @@ insert_rule_after() {
 
 RULE_LAST_INDEX() {
 	[ $# -ge 3 ] || {
-		echolog "Index enumeration method is incorrect（iptables），terminate execution！"
+		echolog "Index enumeration method is incorrect（iptables），Terminate execution！"
 		return 1
 	}
 	local ipt_tmp="${1}"; shift
@@ -344,11 +344,7 @@ load_acl() {
 					else
 						#Will end upreturn，No need to add extra rules。
 						unset tcp_port
-<<<<<<< HEAD
-						echolog "     - ${msg}Not an agent for all TCP port"
-=======
 						echolog "     - ${msg}Not representing all TCP port"
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 					fi
 				}
 				
@@ -360,11 +356,7 @@ load_acl() {
 					else
 						#Will end upreturn，No need to add extra rules。
 						unset udp_port
-<<<<<<< HEAD
-						echolog "     - ${msg}Not an agent for all UDP port"
-=======
 						echolog "     - ${msg}Not representing all UDP port"
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 					fi
 				}
 				
@@ -560,11 +552,7 @@ load_acl() {
 				echolog "     - ${msg}Not an agent TCP port[${TCP_NO_REDIR_PORTS}]"
 			else
 				unset TCP_PROXY_MODE
-<<<<<<< HEAD
-				echolog "     - ${msg}Not an agent for all TCP port"
-=======
 				echolog "     - ${msg}Not representing all TCP port"
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 		
@@ -575,11 +563,7 @@ load_acl() {
 				echolog "     - ${msg}Not an agent UDP port[${UDP_NO_REDIR_PORTS}]"
 			else
 				unset UDP_PROXY_MODE
-<<<<<<< HEAD
-				echolog "     - ${msg}Not an agent for all UDP port"
-=======
 				echolog "     - ${msg}Not representing all UDP port"
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 		
@@ -845,8 +829,19 @@ update_wan_sets() {
 	}
 }
 
+set_tproxy_sysctl() {
+	# Disable IPv4 rp_filter for TPROXY compatibility.
+	sysctl -w net.ipv4.conf.all.rp_filter=0 >/dev/null 2>&1
+	sysctl -w net.ipv4.conf.default.rp_filter=0 >/dev/null 2>&1
+	local f
+	for f in /proc/sys/net/ipv4/conf/*/rp_filter; do
+		echo 0 > "$f" 2>/dev/null
+	done
+}
+
 add_firewall_rule() {
 	echolog "Start loading iptables firewall rules..."
+	set_tproxy_sysctl
 	ipset -! create $IPSET_LOCAL nethash maxelem 1048576
 	ipset -! create $IPSET_WAN nethash maxelem 1048576
 	ipset -! create $IPSET_LAN nethash maxelem 1048576
@@ -1167,11 +1162,7 @@ add_firewall_rule() {
 				echolog "  - ${msg}Not an agent TCP port[${TCP_NO_REDIR_PORTS}]"
 			else
 				unset LOCALHOST_TCP_PROXY_MODE
-<<<<<<< HEAD
-				echolog "  - ${msg}Not an agent for all TCP port"
-=======
 				echolog "  - ${msg}Not representing all TCP port"
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 		
@@ -1182,11 +1173,7 @@ add_firewall_rule() {
 				echolog "  - ${msg}Not an agent UDP port[${UDP_NO_REDIR_PORTS}]"
 			else
 				unset LOCALHOST_UDP_PROXY_MODE
-<<<<<<< HEAD
-				echolog "  - ${msg}Not an agent for all UDP port"
-=======
 				echolog "  - ${msg}Not representing all UDP port"
->>>>>>> 0f8b3f8360068026e37c534c47cf103dc77ebd75
 			fi
 		}
 
